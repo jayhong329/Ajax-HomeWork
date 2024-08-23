@@ -1,0 +1,71 @@
+{% extends 'base.html'%}
+
+{% load static %}
+
+{% block styles %}
+<style>
+  .card-img-top {
+  width: 100%;
+  height: 180px; 
+  object-fit: contain; 
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="div1"class="row row-cols-1 row-cols-md-3 g-4">
+  {% for spot in spots %}
+    <div class="col">
+      <div class="card h-100">
+        <img src="{{ spot.file.img.0.text }}" class="card-img-top" id="img">
+        <div class="card-body">
+          <h5  id="sTitle" class="card-title">{{ spot.stitle }}</h5>
+          <p id="xBody" class="card-text">{{ spot.xbody|truncatechars:100 }}</p>
+        </div>
+        <div class="card-footer">
+          <small id="aDdress" class="text-body-secondary">{{ spot.address}}</small>
+        </div>
+      </div>
+    </div>
+  </div>  
+  {% endfor %}  
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'scripts/travel.js'%}"></script>
+
+<script>
+  
+  (async ()=>{
+    const elediv = document.querySelector("#div1")
+    // call api 取得json資料
+    const response = await fetch("/api/travel/")
+    const datas = await response.json()
+    // 讀出資料  ES6 => 陣列.方法()
+    const eleEmps = datas.map(spots =>{
+      // 解構賦值
+        const {stitle, xbody, address, file } = spots
+        let xbodys = xbody.length > 100 ? xbody.substr(0, 100) + '...' : xbody;
+        const imgUrl = file.img.length > 0 ? file.img[0].text : file.img.text ;
+        return(
+            `<div class="col">
+                <div class="card h-100">
+                    <img src="${imgUrl}" class="card-img-top" id="img">
+                    <div class="card-body">
+                        <h5  id="sTitle" class="card-title">${stitle}</h5>
+                        <p id="xBody" class="card-text">${xbodys}</p>
+                    </div>
+                    <div class="card-footer">
+                        <small id="aDdress" class="text-body-secondary">${address}</small>
+                </div>
+            </div>
+        </div>`
+        )
+    })
+    // 顯示資料
+    elediv.innerHTML =  eleEmps.join("")
+      
+  })();
+
+</script>
+{% endblock %}

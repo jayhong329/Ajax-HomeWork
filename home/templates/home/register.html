@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<form id="registerForm">
+    <div class="mb-3">
+        <label for="InputName" class="form-label">姓名：</label>
+        <input type="text" class="form-control" id="InputName" name="name" required>
+        <div id="nameHelp" class="alert alert-warning" ></div>
+    </div>
+    <div class="mb-3">
+        <label for="InputEmail" class="form-label">電子郵箱：</label>
+        <input type="email" class="form-control" id="InputEmail" name="email" required>
+        <div id="emailHelp" class="alert alert-warning" ></div>
+    </div>
+    <div class="mb-3">
+        <label for="InputPassword" class="form-label">密碼：</label>
+        <input type="password" class="form-control" id="InputPassword" name="password" required>
+    </div>
+    <div class="mb-3">
+        <label for="PasswordCheck" class="form-label">密碼確認：</label>
+        <input type="password" class="form-control" id="PasswordCheck" name="password1" required>
+        <div id="passwordHelp" class="alert alert-warning" ></div>
+    </div>
+    <div class="mb-3">
+        <label for="InputAge" class="form-label">年紀：</label>
+        <input type="number" class="form-control" id="InputAge" name="age">
+    </div>
+    <div class="mb-3">
+        <label for="formFile" class="form-label">頭像：</label>
+        <input class="form-control" type="file" id="formFile" name="avatar" required>
+    </div>
+    <button type="submit" class="btn btn-outline-primary btn-lg" id="buttonSubmit">送出</button>
+</form>
+<br>
+<div id="div1" class="alert alert-info"></div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    const btnSubmit = document.querySelector("#buttonSubmit")
+    const inpName = document.querySelector("#InputName")
+    const inpEmail = document.querySelector("#InputEmail")
+    const inpAge = document.querySelector("#InputAge");
+    const inpPassword = document.querySelector("#InputPassword");
+    const checkPassword = document.querySelector("#PasswordCheck");
+
+    const divInfo = document.querySelector("#div1");
+    const divName = document.querySelector("#nameHelp");
+    const divEmail = document.querySelector("#emailHelp");
+    const divPassword = document.querySelector("#passwordHelp");
+
+    //將輸入的"姓名"傳到api檢查帳號是否存在
+    inpName.addEventListener("blur", async ()=>{
+        
+        // 1.  call api 取得資料
+        const response = await fetch(`/api/checkname/?name=${inpName.value}`)
+        const nameInfo = await response.json()
+
+        // 2. 判斷傳到api 的資料是否已存在資料庫
+        if (nameInfo.name_exists){
+            divName.innerText= '帳號已存在';
+        }else {
+            divName.innerText ='帳號可使用';
+        }
+
+        // 3. 將資料顯示在網頁上
+        divName.innerHTML= divName.innerText
+    })
+
+    //將輸入的"電子郵箱"傳到api檢查是否存在
+    inpEmail.addEventListener("blur", async ()=>{
+        
+        // 1.  call api 取得資料
+        const response = await fetch(`/api/checkemail/?email=${inpEmail.value}`)
+        const emailInfo = await response.json()
+
+        // 2. 判斷傳到api 的資料是否已存在資料庫
+        if (emailInfo.email_exists){
+            divEmail.innerText= '請重新輸入電子郵箱';
+        }else {
+            divEmail.innerText ='電子郵箱可使用';
+        }
+
+        // 3. 將資料顯示在網頁上
+        divEmail.innerHTML= divEmail.innerText
+    })
+
+    //確認"密碼"是否一致
+    checkPassword.addEventListener("input", ()=>{
+        if (inpPassword.value !== checkPassword.value){
+            divPassword.innerText ='密碼不一致，請重新確認';
+        }else {
+            divPassword.innerText ='';
+        }
+    })
+
+btnSubmit.addEventListener("click", async (event)=>{
+    event.preventDefault();
+
+    // 將表單資料塞進FormData物件中
+    const myForm = document.querySelector("#registerForm")
+    const formData = new FormData(myForm)
+
+    // 透過 fetch()將formData資料傳給API
+    const response = await fetch('/api/register/',{
+        method: "POST",
+        body: formData,
+        headers:{
+            "X-CSRFToken":"{{ csrf_token }}"
+        }
+    })
+    const data = await response.text()
+    divInfo.innerHTML = data
+})
+</script>
+{% endblock %}
+
+

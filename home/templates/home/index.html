@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+{% endblock %}
+
+
+{% block content %}
+<h1>HomeWork Index</h1>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+// setTimeout(function () {
+//     console.log('A');
+//     setTimeout(function () {
+//         console.log('B');
+//         setTimeout(function () {
+//             console.log('C');
+//         }, 1000);
+//     }, 1000);
+// }, 1000);
+
+// promise 物件建立
+// const promise = new Promise((resolve,reject) =>{
+//     // 非同步程式碼 放在這裡執行
+//     // 執行成功 產生結果(資料)
+//     // 執行失敗 產生錯誤訊息
+//     if(true){
+//         resolve("成功...!!")
+//     }else{
+//         reject("失敗 Error Message")
+//     }
+// })
+ 
+// // promise物件 執行
+// promise
+//     .then(data =>{
+//         console.log(data)
+//     })
+//     .catch(error =>{
+//         console.log(error)
+//     })
+//     .finally(() =>{
+//         console.log("end")
+//     })
+
+const printSomething = (data) =>{
+    const promise = new Promise((resolve, reject)=>{
+        // 非同步程式碼寫在這裡
+        setTimeout(() =>{
+            resolve(`${data}1`)
+        }, 1000)
+    })
+    return promise
+}
+
+// console.log(printSomething("A"))  //promise
+
+// printSomething("A")
+//     .then(data => {
+//         console.log(data)
+//         return printSomething(`${data}B`)
+//     })
+//     .then(data =>{
+//         console.log(data)
+//         return printSomething(`${data}C`)
+//     })
+//     .then(data =>{
+//         console.log(data)
+//         return printSomething(`${data}D`)
+//     })
+//     .then(data =>{
+//         console.log(data)
+//     })
+
+// promisre 解決 callback hell
+// 雖然是非同步的程式，但寫起來可以跟同步一樣 async await
+
+// async function asyncFunc(){
+//     let data = await printSomething("A")
+//     console.log(data)
+//     data = await printSomething(`${data}B`)
+//     console.log(data)
+//     data = await printSomething(`${data}C`)
+//     console.log(data)
+//     data = await printSomething(`${data}D`)
+//     console.log(data)
+//     data = await printSomething(`${data}E`)
+//     console.log(data)
+// }
+// asyncFunc()
+
+// IIFE 立即執行函式 (() =>{  })();
+
+(async () =>{
+    let data = await printSomething("A")
+    console.log(data)
+    data = await printSomething(`${data}B`)
+    console.log(data)
+    data = await printSomething(`${data}C`)
+    console.log(data)
+    data = await printSomething(`${data}D`)
+    console.log(data)
+    data = await printSomething(`${data}E`)
+    console.log(data)
+})();
+
+</script>
+{% endblock %}
