@@ -25,20 +25,20 @@ def travel(request):
         return JsonResponse(spots, safe=False)
     
 def register(request):
-    content = "請使用 POST 方法提交資料"
+    content = "請完成填寫以便成功送出"
     # 接收 POST 傳過來FormData的資料
     if request.method == "POST":
         name = request.POST.get("name","GUEST")
         email = request.POST.get("email","guest@gmail.com")
-        birth = request.POST.get("birth","2020/10/10")
+        birth = request.POST.get("birth","2020-10-10")
         age = request.POST.get("age",18)
         password = request.POST.get("password")
         password1 = request.POST.get("password1")
 
-        if not name or not email or not password or not password1:
-            error_message = "請填寫所有必填欄位：姓名、電子郵件、密碼和確認密碼。"
+        required_fields = [name, email, password, password1, birth]
+        if any(not field for field in required_fields):
+            error_message = "請填寫所有必填欄位：姓名、電子郵件、密碼、確認密碼和生日。"
             return HttpResponse(error_message, "text/plain; charset=utf-8")
-
 
         # 檢查用戶名是否存在
         if Member.objects.filter(user_name=name).exists():
@@ -53,13 +53,14 @@ def register(request):
             content = f"密碼不一致，請重新確認。"
             return HttpResponse(content, "text/plain; charset=utf-8")
 
-    # 接收傳過來的檔案
+        # 接收傳過來的檔案
         uploaded_file = request.FILES.get("avatar")
         file_name = None
 
     # 把檔案寫進 uploads資料夾
-        fs = FileSystemStorage()
-        file_name = fs.save(uploaded_file.name , uploaded_file)
+        if uploaded_file:
+            fs = FileSystemStorage()
+            file_name = fs.save(uploaded_file.name , uploaded_file)
 
 
     # 將表單傳過來的資料寫進資料庫
