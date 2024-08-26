@@ -4,6 +4,8 @@ from .models import Member
 import time
 import json
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.hashers import make_password
+from datetime import datetime
 
 # Create your views here.
 def index(request):
@@ -23,28 +25,54 @@ def travel(request):
         return JsonResponse(spots, safe=False)
     
 def register(request):
-# 取得 ?id=3的資料
-    # name = request.GET.get("name","GUEST")
-    # email = request.GET.get("email","guest@gmail.com")
-    # age = request.GET.get("age",18)
+    content = "請使用 POST 方法提交資料"
+    # 接收 POST 傳過來FormData的資料
+    if request.method == "POST":
+        name = request.POST.get("name","GUEST")
+        email = request.POST.get("email","guest@gmail.com")
+        birth = request.POST.get("birth","2020/10/10")
+        age = request.POST.get("age",18)
+        password = request.POST.get("password")
+        password1 = request.POST.get("password1")
 
-# 接收 POST 傳過來FormData的資料
-    name = request.POST.get("name","GUEST")
-    email = request.POST.get("email","guest@gmail.com")
-    age = request.POST.get("age",18)
-    password = request.POST.get("password")
-    password1 = request.POST.get("password1")
-# 接收傳過來的檔案
-    uploaded_file = request.FILES.get("avatar")
+        if not name or not email or not password or not password1:
+            error_message = "請填寫所有必填欄位：姓名、電子郵件、密碼和確認密碼。"
+            return HttpResponse(error_message, "text/plain; charset=utf-8")
 
-    file_name = None
 
-# 把檔案寫進 uploads資料夾
-    if uploaded_file:
+        # 檢查用戶名是否存在
+        if Member.objects.filter(user_name=name).exists():
+            content = f"姓名： {name} 已被註冊，請重新輸入。"
+            return HttpResponse(content, "text/plain; charset=utf-8")
+        # 檢查電子郵件是否存在
+        if Member.objects.filter(user_email=email).exists():
+            content = f"電子郵件： {email} 已被註冊，請使用其他電子郵件。"
+            return HttpResponse(content, "text/plain; charset=utf-8")
+        # 檢查密碼是否一致
+        if password != password1:
+            content = f"密碼不一致，請重新確認。"
+            return HttpResponse(content, "text/plain; charset=utf-8")
+
+    # 接收傳過來的檔案
+        uploaded_file = request.FILES.get("avatar")
+        file_name = None
+
+    # 把檔案寫進 uploads資料夾
         fs = FileSystemStorage()
         file_name = fs.save(uploaded_file.name , uploaded_file)
 
-    content = f"{name} 你好，你的電子郵件是{email}，今年{age}歲了，上傳{file_name}成功了!!"
+
+    # 將表單傳過來的資料寫進資料庫
+        Member.objects.create(
+            user_name = name,
+            user_password = make_password(password),
+            user_email = email,
+            user_birth = birth,
+            user_avator = file_name,
+            last_update = datetime.now()
+        )
+
+        content = f"{name} 你好，你的電子郵件是{email}，今年{age}歲了，上傳{file_name}成功了!!"
     return HttpResponse(content, "text/plain; charset=utf-8")
 
 def checkname(request):
@@ -62,14 +90,13 @@ def checkemail(request):
     result = {
         "email_exists": False,
     }
-    # 檢查電子郵箱是否存在
+    # 檢查電子郵件是否存在
     if Member.objects.filter(user_email=email).exists():
         result["email_exists"] = True
     return JsonResponse(result, safe=False)
 
 def checkpassword(request):
     password = request.GET.get("password")
-    password1 = request.GET.get("password1")
     result = {
         "password_match": False,
     }

@@ -27,6 +27,10 @@
         <div id="passwordHelp" class="alert alert-warning" ></div>
     </div>
     <div class="mb-3">
+        <label for="InputBirth" class="form-label">生日：</label>
+        <input type="date" class="form-control" id="InputBirth" name="birth">
+    </div>
+    <div class="mb-3">
         <label for="InputAge" class="form-label">年紀：</label>
         <input type="number" class="form-control" id="InputAge" name="age">
     </div>
@@ -73,7 +77,7 @@
         divName.innerHTML= divName.innerText
     })
 
-    //將輸入的"電子郵箱"傳到api檢查是否存在
+    //將輸入的"電子郵件"傳到api檢查是否存在
     inpEmail.addEventListener("blur", async ()=>{
         
         // 1.  call api 取得資料
